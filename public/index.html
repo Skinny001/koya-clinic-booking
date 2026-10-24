@@ -3,177 +3,462 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Koya Health Clinic — Appointments</title>
+  <title>Koya Health® — Clinical Appointments</title>
+  <link rel="icon" type="image/jpeg" href="/favicon.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
+    /* HSL Color Theme Variables as specified */
     :root {
-      --primary: #0284c7;
-      --primary-hover: #0369a1;
-      --primary-light: #e0f2fe;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --success: #10b981;
-      --success-light: #d1fae5;
-      --danger: #ef4444;
-      --danger-light: #fee2e2;
-      --radius: 12px;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+      --background: 201 100% 13%; /* deep navy blue #00223D */
+      --foreground: 0 0% 100%;
+      --muted-foreground: 240 4% 66%;
+      --primary: 0 0% 100%;
+      --primary-foreground: 0 0% 4%;
+      --secondary: 0 0% 10%;
+      --muted: 0 0% 10%;
+      --accent: 0 0% 10%;
+      --border: 0 0% 18%;
+      --input: 0 0% 18%;
+
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --success: #34d399;
+      --danger: #f87171;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      font-family: var(--font-body);
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
       line-height: 1.5;
-      padding-bottom: 60px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      font-family: var(--font-body);
     }
 
-    header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-      background-color: rgba(255, 255, 255, 0.9);
+    /* Fullscreen Looping Video Background */
+    .video-background {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+      filter: brightness(0.88) contrast(1.04);
     }
 
-    .header-inner {
-      max-width: 1080px;
+    /* Liquid Glass Effect */
+    .liquid-glass {
+      background: rgba(255, 255, 255, 0.01);
+      background-blend-mode: luminosity;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: none;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+    }
+
+    .liquid-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.4px;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+        rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+        rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Elevated Liquid Glass for Cards & Modals */
+    .liquid-glass-card {
+      background: rgba(1, 18, 33, 0.62);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 14px 34px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Keyframe Animations */
+    @keyframes fade-rise {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-rise { animation: fade-rise 0.8s ease-out both; }
+    .animate-fade-rise-delay { animation: fade-rise 0.8s ease-out 0.2s both; }
+    .animate-fade-rise-delay-2 { animation: fade-rise 0.8s ease-out 0.4s both; }
+
+    /* Navigation Bar */
+    .nav-wrapper {
+      position: relative;
+      z-index: 20;
+      width: 100%;
+      padding: 24px 32px;
+      max-width: 1280px;
       margin: 0 auto;
+    }
+
+    .nav-bar {
       display: flex;
+      flex-direction: row;
       justify-content: space-between;
       align-items: center;
+      gap: 20px;
+      padding: 12px 24px;
+      border-radius: 9999px;
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: var(--primary);
+      gap: 12px;
       text-decoration: none;
+      color: hsl(var(--foreground));
     }
 
-    .logo-badge {
-      background: var(--primary);
-      color: white;
-      width: 32px;
-      height: 32px;
+    .logo-img {
+      width: 36px;
+      height: 36px;
       border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 1.85rem;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: hsl(var(--foreground));
+      font-weight: 400;
+    }
+
+    .logo-text sup {
+      font-family: var(--font-body);
+      font-size: 0.55em;
+      top: -0.6em;
+      position: relative;
+      color: hsl(var(--muted-foreground));
+    }
+
+    .nav-links {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
+      gap: 24px;
+    }
+
+    .nav-link {
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      background: transparent;
+      border: none;
+      font-weight: 500;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: hsl(var(--foreground));
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .time-pill {
+      padding: 7px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+
+    .time-pill .clock-digits {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #38bdf8;
+      letter-spacing: 0.02em;
     }
 
     .badge-live {
-      background: #ecfdf5;
-      color: #059669;
-      border: 1px solid #a7f3d0;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
+      padding: 7px 14px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      color: #34d399;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.25);
     }
 
     .pulse {
       width: 8px;
       height: 8px;
-      background: #10b981;
+      background: #34d399;
       border-radius: 50%;
-      animation: pulse-ring 1.5s infinite;
+      animation: pulse-ring 1.8s infinite;
     }
 
     @keyframes pulse-ring {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
     }
 
-    main {
-      max-width: 1080px;
-      margin: 32px auto 0;
-      padding: 0 20px;
+    .btn-nav-cta {
+      border-radius: 9999px;
+      padding: 10px 22px;
+      font-size: 0.875rem;
+      color: hsl(var(--foreground));
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
     }
 
-    .hero {
+    .btn-nav-cta:hover {
+      transform: scale(1.03);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
-      margin-bottom: 36px;
-    }
-
-    .hero h1 {
-      font-size: 2.25rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 8px;
-      color: #0f172a;
-    }
-
-    .hero p {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      max-width: 580px;
+      padding: 80px 24px 60px;
+      max-width: 1280px;
       margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 18px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: hsl(var(--muted-foreground));
+      margin-bottom: 24px;
+    }
+
+    .hero-h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3.2rem, 7.8vw, 6.2rem);
+      line-height: 0.95;
+      letter-spacing: -2.46px;
+      font-weight: 400;
+      color: hsl(var(--foreground));
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .hero-h1 em {
+      font-style: normal;
+      color: hsl(var(--muted-foreground));
+    }
+
+    .hero-subtext {
+      color: hsl(var(--muted-foreground));
+      font-size: clamp(1rem, 1.6vw, 1.15rem);
+      max-width: 42rem;
+      margin: 28px auto 0;
+      line-height: 1.65;
+    }
+
+    .hero-cta {
+      border-radius: 9999px;
+      padding: 18px 48px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: hsl(var(--foreground));
+      margin-top: 36px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .hero-cta:hover {
+      transform: scale(1.03);
+    }
+
+    /* Live Nigeria Time Hero Card */
+    .nigeria-time-card {
+      position: relative;
+      z-index: 10;
+      max-width: 1100px;
+      margin: 10px auto 40px;
+      padding: 18px 24px;
+      border-radius: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .time-card-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .flag-circle {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .time-card-label {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      color: #38bdf8;
+      margin-bottom: 2px;
+    }
+
+    .time-card-display {
+      font-family: var(--font-mono);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .time-card-display .tz-tag {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .clinic-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-open {
+      background: rgba(52, 211, 153, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .status-after-hours {
+      background: rgba(56, 189, 248, 0.15);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    /* Content Area */
+    main {
+      position: relative;
+      z-index: 10;
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
     }
 
     /* Tabs */
     .tabs {
       display: flex;
       justify-content: center;
-      gap: 8px;
-      margin-bottom: 28px;
+      gap: 12px;
+      margin-bottom: 32px;
     }
 
     .tab-btn {
-      background: white;
-      border: 1px solid var(--border);
-      padding: 10px 20px;
-      border-radius: 30px;
-      font-weight: 600;
-      font-size: 0.9rem;
+      padding: 11px 28px;
+      border-radius: 9999px;
+      font-weight: 500;
+      font-size: 0.92rem;
+      color: hsl(var(--muted-foreground));
       cursor: pointer;
-      transition: all 0.2s;
-      color: var(--text-muted);
+      border: none;
+    }
+
+    .tab-btn:hover {
+      color: hsl(var(--foreground));
+      transform: scale(1.02);
     }
 
     .tab-btn.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+      background: #ffffff;
+      color: hsl(var(--background));
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.28);
     }
 
     /* Controls Bar */
     .controls {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 20px;
+      padding: 16px 22px;
+      border-radius: 16px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
       margin-bottom: 24px;
-      box-shadow: var(--shadow);
     }
 
     .filter-group {
@@ -183,162 +468,171 @@
     }
 
     .filter-group label {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--text-muted);
+      color: hsl(var(--muted-foreground));
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
     }
 
     select, input {
-      border: 1px solid var(--border);
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: 0.92rem;
       outline: none;
-      background: white;
-      color: var(--text);
-      transition: border 0.2s;
+      background: rgba(0, 18, 34, 0.7);
+      color: #ffffff;
+      transition: all 0.2s;
     }
 
     select:focus, input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    select option {
+      background: #001222;
+      color: #ffffff;
     }
 
     .btn {
-      background: var(--primary);
-      color: white;
+      background: #ffffff;
+      color: #001222;
       border: none;
-      padding: 10px 18px;
-      border-radius: 8px;
+      padding: 10px 22px;
+      border-radius: 9999px;
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .btn:hover {
-      background: var(--primary-hover);
+      transform: scale(1.02);
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.25);
     }
 
     .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
 
     .btn-outline:hover {
-      background: var(--bg);
+      background: rgba(255, 255, 255, 0.16);
     }
 
     .btn-danger {
       background: var(--danger);
-      color: white;
+      color: #ffffff;
     }
 
     .btn-danger:hover {
-      background: #dc2626;
+      background: #ef4444;
     }
 
     /* Slots Grid */
     .slots-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 22px;
     }
 
     .slot-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
+      border-radius: 18px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
     }
 
     .slot-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
     }
 
     .slot-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .provider-name {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      color: #ffffff;
+      line-height: 1.1;
+      font-weight: 400;
     }
 
     .slot-status {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 6px;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 20px;
     }
 
     .status-available {
-      background: var(--success-light);
-      color: #065f46;
+      background: rgba(52, 211, 153, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
     }
 
     .status-booked {
-      background: #f1f5f9;
-      color: #64748b;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .slot-time {
       font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 18px;
+      color: hsl(var(--muted-foreground));
+      margin-bottom: 22px;
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
     .slot-time strong {
-      color: var(--text);
+      color: #ffffff;
+      font-weight: 600;
     }
 
     .slot-btn {
       width: 100%;
       justify-content: center;
-      padding: 10px;
+      padding: 12px;
     }
 
     .slot-btn:disabled {
-      background: #e2e8f0;
-      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.3);
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
-    /* Modal */
+    /* Modals */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 10, 20, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px;
       z-index: 200;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s;
+      transition: opacity 0.25s ease;
     }
 
     .modal-overlay.active {
@@ -347,53 +641,56 @@
     }
 
     .modal {
-      background: white;
-      border-radius: 16px;
+      border-radius: 24px;
       width: 100%;
-      max-width: 440px;
-      padding: 28px;
-      box-shadow: var(--shadow-lg);
-      transform: translateY(10px);
-      transition: transform 0.2s;
+      max-width: 480px;
+      padding: 34px;
+      transform: translateY(18px) scale(0.97);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .modal-overlay.active .modal {
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
 
     .modal h2 {
-      font-size: 1.35rem;
-      font-weight: 700;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 400;
+      color: #ffffff;
       margin-bottom: 6px;
+      line-height: 1.1;
     }
 
     .modal-sub {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 20px;
+      color: hsl(var(--muted-foreground));
+      font-size: 0.92rem;
+      margin-bottom: 22px;
     }
 
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .form-group label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.8);
     }
 
     .form-group input {
       width: 100%;
-      padding: 10px 14px;
+      padding: 12px 16px;
     }
 
     .modal-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 24px;
+      gap: 12px;
+      margin-top: 26px;
     }
 
     .modal-actions .btn {
@@ -401,136 +698,294 @@
       justify-content: center;
     }
 
-    /* Confirmation Banner */
-    .confirmation-banner {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 28px;
-      display: none;
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .confirmation-banner.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .banner-title {
-      color: #065f46;
-      font-size: 1.15rem;
-      font-weight: 700;
+    .modal-icon-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+      justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 2rem;
     }
 
-    .banner-details {
-      color: #047857;
-      font-size: 0.95rem;
-      line-height: 1.6;
+    .modal-icon-success {
+      background: rgba(52, 211, 153, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
     }
 
-    /* Bookings lookup section */
-    .lookup-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
+    .modal-icon-danger {
+      background: rgba(248, 113, 113, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .modal-detail-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: left;
+      font-size: 0.92rem;
       margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .booking-item {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      margin-top: 12px;
+    .modal-detail-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
     }
 
+    .modal-detail-row span.label {
+      color: hsl(var(--muted-foreground));
+      font-size: 0.85rem;
+    }
+
+    .modal-detail-row span.value {
+      color: #ffffff;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    /* Toast Notification System */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      min-width: 320px;
+      max-width: 420px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: all 0.25s ease;
+    }
+
+    .toast.toast-exit {
+      opacity: 0;
+      transform: translateX(30px) scale(0.95);
+    }
+
+    .toast-success { border-left: 4px solid #34d399; }
+    .toast-danger { border-left: 4px solid #f87171; }
+    .toast-info { border-left: 4px solid #38bdf8; }
+
+    .toast-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .toast-success .toast-icon {
+      background: rgba(52, 211, 153, 0.2);
+      color: #34d399;
+    }
+
+    .toast-danger .toast-icon {
+      background: rgba(248, 113, 113, 0.2);
+      color: #f87171;
+    }
+
+    .toast-info .toast-icon {
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+    }
+
+    .toast-body { flex: 1; }
+
+    .toast-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .toast-message {
+      font-size: 0.85rem;
+      color: hsl(var(--muted-foreground));
+      line-height: 1.4;
+    }
+
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 0 4px;
+      transition: color 0.2s;
+    }
+
+    .toast-close:hover { color: #ffffff; }
+
+    @keyframes toastSlideIn {
+      from { opacity: 0; transform: translateX(40px) scale(0.95); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+
+    /* Bookings lookup section */
+    .lookup-card {
+      padding: 28px;
+      border-radius: 18px;
+      margin-bottom: 24px;
+    }
+
+    .booking-item {
+      padding: 20px 24px;
+      border-radius: 16px;
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s;
+    }
+
     .booking-info h4 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 4px;
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      color: #ffffff;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 400;
     }
 
     .booking-meta {
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      font-size: 0.88rem;
+      color: hsl(var(--muted-foreground));
+      line-height: 1.6;
     }
 
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
+      padding: 48px 20px;
+      border-radius: 16px;
+      color: hsl(var(--muted-foreground));
+      font-size: 1rem;
     }
 
-    .alert {
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      margin-bottom: 16px;
-      display: none;
-    }
-
-    .alert-error {
-      background: var(--danger-light);
-      color: #991b1b;
-      border: 1px solid #fecaca;
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-wrapper { padding: 16px 20px; }
+      .nav-bar { padding: 10px 16px; }
+      .nigeria-time-card { flex-direction: column; align-items: flex-start; }
+      .time-pill { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="header-inner">
+  <!-- Fullscreen Looping Video Background as requested -->
+  <video class="video-background" autoplay loop muted playsinline>
+    <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4" type="video/mp4">
+  </video>
+
+  <!-- Floating Toast Notifications Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Navigation Bar -->
+  <div class="nav-wrapper">
+    <nav class="nav-bar liquid-glass">
       <a href="/" class="logo">
-        <div class="logo-badge">⚕</div>
-        <span>Koya Clinic</span>
+        <img src="/logo.jpg" alt="Koya Health" class="logo-img" />
+        <span class="logo-text">Koya Health<sup>®</sup></span>
       </a>
-      <div class="badge-live">
-        <span class="pulse"></span>
-        API Online
+
+      <!-- Desktop Nav Links -->
+      <div class="nav-links">
+        <button class="nav-link active" onclick="switchTab('slots')">Available Slots</button>
+        <button class="nav-link" onclick="switchTab('lookup')">My Bookings</button>
+      </div>
+
+      <div class="nav-right">
+        <!-- Live Nigeria Header Clock -->
+        <div class="time-pill liquid-glass">
+          <span>🇳🇬</span>
+          <span>WAT: <span class="clock-digits" id="headerNigeriaClock">--:--:--</span></span>
+        </div>
+        <div class="badge-live">
+          <span class="pulse"></span>
+          API Online
+        </div>
+        <button class="btn-nav-cta liquid-glass" onclick="switchTab('slots')">
+          Book Consultation
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Cinematic Hero Section -->
+  <section class="hero-section">
+    <div class="hero-eyebrow liquid-glass animate-fade-rise">
+      <span>Where Clinical Precision Meets Modern Care</span>
+    </div>
+
+    <h1 class="hero-h1 animate-fade-rise">
+      Where healing rises <em>through the silence.</em>
+    </h1>
+
+    <p class="hero-subtext animate-fade-rise-delay">
+      We're designing clinical care for deep thinkers, bold creators, and everyday heroes. Amid the chaos, we build digital spaces for sharp focus, verified doctors, and instant booking.
+    </p>
+
+    <a href="#slotsSection" class="hero-cta liquid-glass animate-fade-rise-delay-2" onclick="switchTab('slots')">
+      Begin Journey — Book Slot
+      <span>→</span>
+    </a>
+  </section>
+
+  <!-- Live Nigeria Time Status Card (Liquid Glass) -->
+  <div class="nigeria-time-card liquid-glass liquid-glass-card animate-fade-rise-delay-2">
+    <div class="time-card-left">
+      <div class="flag-circle">🇳🇬</div>
+      <div>
+        <div class="time-card-label">Current Nigeria Local Time (Lagos • West Africa Time)</div>
+        <div class="time-card-display">
+          <span id="nigeriaLiveTime">Loading clock...</span>
+          <span class="tz-tag">WAT • UTC+1</span>
+        </div>
       </div>
     </div>
-  </header>
+    <div class="clinic-status-badge status-open" id="clinicStatusBadge">
+      <span class="pulse"></span> Consultation Hours Active
+    </div>
+  </div>
 
   <main>
-    <div class="hero">
-      <h1>Book Your Medical Appointment</h1>
-      <p>Select an available consultation slot with our qualified medical team and receive immediate confirmation.</p>
-    </div>
-
-    <!-- Confirmation Banner -->
-    <div id="confirmBanner" class="confirmation-banner">
-      <div class="banner-title">
-        <span>✓</span> Booking Confirmed!
-      </div>
-      <div id="confirmDetails" class="banner-details"></div>
-    </div>
-
-    <!-- Error Alert -->
-    <div id="alertBox" class="alert alert-error"></div>
-
     <!-- Section Tabs -->
     <div class="tabs">
-      <button class="tab-btn active" id="tabSlotsBtn" onclick="switchTab('slots')">Available Slots</button>
-      <button class="tab-btn" id="tabLookupBtn" onclick="switchTab('lookup')">Find My Bookings</button>
+      <button class="tab-btn liquid-glass active" id="tabSlotsBtn" onclick="switchTab('slots')">Available Slots</button>
+      <button class="tab-btn liquid-glass" id="tabLookupBtn" onclick="switchTab('lookup')">Find My Bookings</button>
     </div>
 
     <!-- Tab 1: Slots Section -->
     <section id="slotsSection">
-      <div class="controls">
+      <div class="controls liquid-glass liquid-glass-card">
         <div class="filter-group">
           <label for="providerFilter">Doctor</label>
           <select id="providerFilter" onchange="loadSlots()">
@@ -543,19 +998,19 @@
       </div>
 
       <div class="slots-grid" id="slotsContainer">
-        <div class="empty-state">Loading appointment slots...</div>
+        <div class="empty-state liquid-glass liquid-glass-card">Loading appointment slots...</div>
       </div>
     </section>
 
     <!-- Tab 2: My Bookings Lookup Section -->
     <section id="lookupSection" style="display: none;">
-      <div class="lookup-card">
-        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px;">Look Up Your Bookings</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
-          Enter the email address you used to book your appointments.
+      <div class="lookup-card liquid-glass liquid-glass-card">
+        <h3 style="font-family: var(--font-display); font-size: 1.7rem; color: #ffffff; margin-bottom: 6px; font-weight: 400;">Look Up Your Bookings</h3>
+        <p style="color: hsl(var(--muted-foreground)); font-size: 0.95rem; margin-bottom: 18px;">
+          Enter the patient email address used to schedule your appointments.
         </p>
-        <div style="display: flex; gap: 10px; max-width: 480px;">
-          <input type="email" id="lookupEmail" placeholder="e.g. ada@example.com" style="flex: 1;" />
+        <div style="display: flex; gap: 12px; max-width: 520px; flex-wrap: wrap;">
+          <input type="email" id="lookupEmail" placeholder="e.g. ada@example.com" style="flex: 1; min-width: 240px;" />
           <button class="btn" onclick="lookupBookings()">Search</button>
         </div>
       </div>
@@ -564,9 +1019,9 @@
     </section>
   </main>
 
-  <!-- Booking Modal -->
+  <!-- 1. Booking Input Modal -->
   <div class="modal-overlay" id="bookingModal">
-    <div class="modal">
+    <div class="modal liquid-glass liquid-glass-card">
       <h2>Complete Booking</h2>
       <p class="modal-sub" id="modalSlotSummary"></p>
 
@@ -589,12 +1044,155 @@
     </div>
   </div>
 
+  <!-- 2. Booking Success Confirmation Modal -->
+  <div class="modal-overlay" id="bookingSuccessModal">
+    <div class="modal liquid-glass liquid-glass-card" style="text-align: center;">
+      <div class="modal-icon-circle modal-icon-success">✓</div>
+      <h2>Appointment Confirmed</h2>
+      <p class="modal-sub">Your consultation has been reserved. Please find your details below.</p>
+
+      <div class="modal-detail-box">
+        <div class="modal-detail-row">
+          <span class="label">Doctor</span>
+          <span class="value" id="successDoctor">—</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="label">Date & Time</span>
+          <span class="value" id="successTime">—</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="label">Patient</span>
+          <span class="value" id="successPatient">—</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="label">Booking ID</span>
+          <span class="value" style="font-family: var(--font-mono); font-size: 0.85rem; color: #38bdf8;" id="successBookingId">—</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="label">Status</span>
+          <span class="value" style="color: var(--success); text-transform: uppercase;">Confirmed</span>
+        </div>
+      </div>
+
+      <button class="btn" style="width: 100%; justify-content: center;" onclick="closeSuccessModal()">Done</button>
+    </div>
+  </div>
+
+  <!-- 3. Cancel Booking Confirmation Modal -->
+  <div class="modal-overlay" id="cancelConfirmModal">
+    <div class="modal liquid-glass liquid-glass-card" style="text-align: center;">
+      <div class="modal-icon-circle modal-icon-danger">✕</div>
+      <h2>Cancel Appointment?</h2>
+      <p class="modal-sub">Are you sure you want to cancel this booking? This will immediately free the slot for other patients.</p>
+
+      <div class="modal-detail-box">
+        <div class="modal-detail-row">
+          <span class="label">Booking ID</span>
+          <span class="value" style="font-family: var(--font-mono); font-size: 0.85rem;" id="cancelModalBookingId">—</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="label">Patient</span>
+          <span class="value" id="cancelModalPatient">—</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeCancelModal()">Keep Booking</button>
+        <button type="button" class="btn btn-danger" id="executeCancelBtn" onclick="executeCancelBooking()">Yes, Cancel Slot</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let currentApiKey = 'koya-clinic-secret-key-2026';
     let allSlots = [];
+    let pendingCancelId = null;
+
+    // Real-Time Live Nigeria Clock (WAT / Africa/Lagos)
+    function updateNigeriaTime() {
+      const now = new Date();
+
+      // Format full date & time for the hero card
+      const fullOptions = {
+        timeZone: 'Africa/Lagos',
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      };
+      const formattedFull = new Intl.DateTimeFormat('en-US', fullOptions).format(now);
+      const liveClockElem = document.getElementById('nigeriaLiveTime');
+      if (liveClockElem) liveClockElem.textContent = formattedFull;
+
+      // Format short time for header pill
+      const timeOnlyOptions = {
+        timeZone: 'Africa/Lagos',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      };
+      const formattedTime = new Intl.DateTimeFormat('en-US', timeOnlyOptions).format(now);
+      const headerClockElem = document.getElementById('headerNigeriaClock');
+      if (headerClockElem) headerClockElem.textContent = formattedTime;
+
+      // Dynamic clinic operational status based on Lagos hour
+      const lagosHour = parseInt(new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Africa/Lagos',
+        hour: 'numeric',
+        hour12: false
+      }).format(now), 10);
+
+      const statusBadge = document.getElementById('clinicStatusBadge');
+      if (statusBadge) {
+        const isOpen = lagosHour >= 8 && lagosHour < 18;
+        statusBadge.className = `clinic-status-badge ${isOpen ? 'status-open' : 'status-after-hours'}`;
+        statusBadge.innerHTML = `<span class="pulse"></span> ${isOpen ? 'Consultation Hours Active (8 AM – 6 PM)' : 'Online Booking Active 24/7'}`;
+      }
+    }
+
+    // Toast Notification Utility (Liquid Glass style)
+    function showToast(title, message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast liquid-glass liquid-glass-card toast-${type}`;
+
+      const iconChar = type === 'success' ? '✓' : (type === 'danger' ? '✕' : 'ℹ');
+
+      toast.innerHTML = `
+        <div class="toast-icon">${iconChar}</div>
+        <div class="toast-body">
+          <div class="toast-title">${escapeHtml(title)}</div>
+          <div class="toast-message">${escapeHtml(message)}</div>
+        </div>
+        <button class="toast-close" onclick="dismissToast(this.parentElement)">&times;</button>
+      `;
+
+      container.appendChild(toast);
+
+      // Auto dismiss after 4 seconds
+      setTimeout(() => {
+        dismissToast(toast);
+      }, 4000);
+    }
+
+    function dismissToast(toast) {
+      if (!toast || toast.classList.contains('toast-exit')) return;
+      toast.classList.add('toast-exit');
+      setTimeout(() => {
+        if (toast.parentElement) toast.parentElement.removeChild(toast);
+      }, 250);
+    }
 
     // Initialize API Key from backend config
     async function init() {
+      updateNigeriaTime();
+      setInterval(updateNigeriaTime, 1000);
+
       try {
         const res = await fetch('/config');
         if (res.ok) {
@@ -614,13 +1212,6 @@
       document.getElementById('tabLookupBtn').classList.toggle('active', tab === 'lookup');
       document.getElementById('slotsSection').style.display = tab === 'slots' ? 'block' : 'none';
       document.getElementById('lookupSection').style.display = tab === 'lookup' ? 'block' : 'none';
-    }
-
-    function showAlert(msg) {
-      const box = document.getElementById('alertBox');
-      box.textContent = msg;
-      box.style.display = 'block';
-      setTimeout(() => { box.style.display = 'none'; }, 5000);
     }
 
     // Load Slots from API
@@ -643,10 +1234,11 @@
         populateProviders(allSlots);
       } catch (err) {
         document.getElementById('slotsContainer').innerHTML = `
-          <div class="empty-state" style="color: var(--danger);">
-            ${err.message}. Check if demo slots need to be seeded.
+          <div class="empty-state liquid-glass liquid-glass-card" style="color: var(--danger);">
+            ${err.message}. Please check if the API is active.
           </div>
         `;
+        showToast('Error', err.message, 'danger');
       }
     }
 
@@ -671,7 +1263,7 @@
       const container = document.getElementById('slotsContainer');
       if (!slots || slots.length === 0) {
         container.innerHTML = `
-          <div class="empty-state">
+          <div class="empty-state liquid-glass liquid-glass-card">
             No appointment slots currently available. Please refresh or check back soon.
           </div>
         `;
@@ -685,7 +1277,7 @@
         const statusClass = slot.available && !isPast ? 'status-available' : 'status-booked';
 
         return `
-          <div class="slot-card">
+          <div class="slot-card liquid-glass liquid-glass-card">
             <div>
               <div class="slot-header">
                 <div class="provider-name">${escapeHtml(slot.provider)}</div>
@@ -707,6 +1299,8 @@
     function openBookingModal(slotId, provider, startTime) {
       document.getElementById('modalSlotId').value = slotId;
       document.getElementById('modalSlotSummary').textContent = `${provider} • ${formatDate(startTime)}`;
+      document.getElementById('modalSlotSummary').dataset.provider = provider;
+      document.getElementById('modalSlotSummary').dataset.start = startTime;
       document.getElementById('bookingModal').classList.add('active');
     }
 
@@ -715,12 +1309,18 @@
       document.getElementById('bookingForm').reset();
     }
 
-    // Submit Booking
+    function closeSuccessModal() {
+      document.getElementById('bookingSuccessModal').classList.remove('active');
+    }
+
+    // Submit Booking with Toast & Success Modal
     async function submitBooking(e) {
       e.preventDefault();
       const slot_id = document.getElementById('modalSlotId').value;
       const name = document.getElementById('patientName').value.trim();
       const email = document.getElementById('patientEmail').value.trim();
+      const provider = document.getElementById('modalSlotSummary').dataset.provider || 'Doctor';
+      const startTime = document.getElementById('modalSlotSummary').dataset.start;
       const btn = document.getElementById('modalSubmitBtn');
 
       btn.disabled = true;
@@ -743,20 +1343,20 @@
 
         closeModal();
 
-        // Show confirmation banner
-        const banner = document.getElementById('confirmBanner');
-        document.getElementById('confirmDetails').innerHTML = `
-          Appointment ID: <strong>${data.id}</strong><br>
-          Patient: <strong>${escapeHtml(data.name)}</strong> (${escapeHtml(data.email)})<br>
-          Status: <strong>${data.status.toUpperCase()}</strong>
-        `;
-        banner.classList.add('active');
-        banner.scrollIntoView({ behavior: 'smooth' });
+        // Populate and open Confirmation Modal
+        document.getElementById('successDoctor').textContent = provider;
+        document.getElementById('successTime').textContent = startTime ? formatDate(startTime) : 'Confirmed';
+        document.getElementById('successPatient').textContent = `${data.name} (${data.email})`;
+        document.getElementById('successBookingId').textContent = data.id;
+        document.getElementById('bookingSuccessModal').classList.add('active');
+
+        // Trigger Success Toast
+        showToast('Appointment Booked!', `Your slot with ${provider} is confirmed.`, 'success');
 
         // Reload slots
         loadSlots();
       } catch (err) {
-        showAlert(err.message);
+        showToast('Booking Failed', err.message, 'danger');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Confirm Appointment';
@@ -767,12 +1367,12 @@
     async function lookupBookings() {
       const email = document.getElementById('lookupEmail').value.trim();
       if (!email) {
-        showAlert('Please enter an email to search');
+        showToast('Required', 'Please enter an email to search', 'info');
         return;
       }
 
       const container = document.getElementById('userBookingsList');
-      container.innerHTML = '<div class="empty-state">Searching bookings...</div>';
+      container.innerHTML = '<div class="empty-state liquid-glass liquid-glass-card">Searching bookings...</div>';
 
       try {
         const res = await fetch(`/bookings?email=${encodeURIComponent(email)}`, {
@@ -786,55 +1386,77 @@
 
         const bookings = data.bookings || [];
         if (bookings.length === 0) {
-          container.innerHTML = `<div class="empty-state">No bookings found for ${escapeHtml(email)}.</div>`;
+          container.innerHTML = `<div class="empty-state liquid-glass liquid-glass-card">No bookings found for ${escapeHtml(email)}.</div>`;
           return;
         }
 
         container.innerHTML = bookings.map(b => `
-          <div class="booking-item">
+          <div class="booking-item liquid-glass liquid-glass-card">
             <div class="booking-info">
-              <h4>Slot ID: ${escapeHtml(b.slot_id)} • Status: <span style="color: ${b.status === 'confirmed' ? 'var(--success)' : 'var(--danger)'};">${b.status.toUpperCase()}</span></h4>
+              <h4>Slot ID: ${escapeHtml(b.slot_id)} • <span style="font-size: 0.75rem; font-weight: 700; color: ${b.status === 'confirmed' ? 'var(--success)' : 'var(--danger)'}; border: 1px solid currentColor; padding: 2px 8px; border-radius: 12px;">${b.status.toUpperCase()}</span></h4>
               <div class="booking-meta">
-                Booking ID: ${b.id}<br>
-                Patient: ${escapeHtml(b.name)} (${escapeHtml(b.email)})<br>
-                Booked at: ${formatDate(b.created_at)}
+                Booking ID: <code style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; color: #38bdf8; font-family: var(--font-mono);">${b.id}</code><br>
+                Patient: <strong>${escapeHtml(b.name)}</strong> (${escapeHtml(b.email)})<br>
+                Booked: ${formatDate(b.created_at)}
               </div>
             </div>
             ${b.status === 'confirmed' ? `
-              <button class="btn btn-danger" onclick="cancelBooking('${b.id}')">Cancel</button>
-            ` : '<span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Cancelled</span>'}
+              <button class="btn btn-danger" onclick="openCancelModal('${b.id}', '${escapeHtml(b.name)}')">Cancel Booking</button>
+            ` : '<span style="font-size: 0.85rem; color: hsl(var(--muted-foreground)); font-weight: 600;">Cancelled</span>'}
           </div>
         `).join('');
       } catch (err) {
-        showAlert(err.message);
+        showToast('Error', err.message, 'danger');
         container.innerHTML = '';
       }
     }
 
-    // Cancel booking (Level 3 endpoint)
-    async function cancelBooking(id) {
-      if (!confirm('Are you sure you want to cancel this booking?')) return;
+    // Open Cancel Modal
+    function openCancelModal(bookingId, patientName) {
+      pendingCancelId = bookingId;
+      document.getElementById('cancelModalBookingId').textContent = bookingId;
+      document.getElementById('cancelModalPatient').textContent = patientName || 'Patient';
+      document.getElementById('cancelConfirmModal').classList.add('active');
+    }
+
+    function closeCancelModal() {
+      pendingCancelId = null;
+      document.getElementById('cancelConfirmModal').classList.remove('active');
+    }
+
+    // Execute Cancel Booking with Toast
+    async function executeCancelBooking() {
+      if (!pendingCancelId) return;
+
+      const btn = document.getElementById('executeCancelBtn');
+      btn.disabled = true;
+      btn.textContent = 'Cancelling...';
 
       try {
-        const res = await fetch(`/bookings/${id}`, {
+        const res = await fetch(`/bookings/${pendingCancelId}`, {
           method: 'DELETE',
           headers: { 'X-API-Key': currentApiKey }
         });
 
         const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.error || 'Failed to cancel');
+          throw new Error(data.error || 'Failed to cancel appointment');
         }
 
-        showAlert('Booking cancelled successfully');
+        closeCancelModal();
+
+        // Trigger Cancel Toast Notification
+        showToast('Booking Cancelled', `Appointment ${pendingCancelId} has been cancelled and the slot is freed.`, 'danger');
+
         lookupBookings();
         loadSlots();
       } catch (err) {
-        showAlert(err.message);
+        showToast('Cancellation Failed', err.message, 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Yes, Cancel Slot';
       }
     }
-
-
 
     function escapeHtml(str) {
       if (!str) return '';
