@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koya Health Clinic — Appointments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .header-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .logo-badge {
+      background: var(--primary);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .badge-live {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse-ring 1.5s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 32px auto 0;
+      padding: 0 20px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-muted);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+
+    /* Controls Bar */
+    .controls {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .filter-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    select, input {
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      background: white;
+      color: var(--text);
+      transition: border 0.2s;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* Slots Grid */
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 18px;
+    }
+
+    .slot-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .slot-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .slot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .provider-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .slot-status {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .status-available {
+      background: var(--success-light);
+      color: #065f46;
+    }
+
+    .status-booked {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .slot-time {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slot-time strong {
+      color: var(--text);
+    }
+
+    .slot-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .slot-btn:disabled {
+      background: #e2e8f0;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(10px);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .modal-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    /* Confirmation Banner */
+    .confirmation-banner {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .confirmation-banner.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .banner-title {
+      color: #065f46;
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .banner-details {
+      color: #047857;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Bookings lookup section */
+    .lookup-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .booking-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .booking-info h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .booking-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert-error {
+      background: var(--danger-light);
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">
+        <div class="logo-badge">⚕</div>
+        <span>Koya Clinic</span>
+      </a>
+      <div class="badge-live">
+        <span class="pulse"></span>
+        API Online
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>Book Your Medical Appointment</h1>
+      <p>Select an available consultation slot with our qualified medical team and receive immediate confirmation.</p>
+    </div>
+
+    <!-- Confirmation Banner -->
+    <div id="confirmBanner" class="confirmation-banner">
+      <div class="banner-title">
+        <span>✓</span> Booking Confirmed!
+      </div>
+      <div id="confirmDetails" class="banner-details"></div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="alertBox" class="alert alert-error"></div>
+
+    <!-- Section Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tabSlotsBtn" onclick="switchTab('slots')">Available Slots</button>
+      <button class="tab-btn" id="tabLookupBtn" onclick="switchTab('lookup')">Find My Bookings</button>
+    </div>
+
+    <!-- Tab 1: Slots Section -->
+    <section id="slotsSection">
+      <div class="controls">
+        <div class="filter-group">
+          <label for="providerFilter">Doctor</label>
+          <select id="providerFilter" onchange="loadSlots()">
+            <option value="">All Providers</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn btn-outline" onclick="loadSlots()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="slots-grid" id="slotsContainer">
+        <div class="empty-state">Loading appointment slots...</div>
+      </div>
+    </section>
+
+    <!-- Tab 2: My Bookings Lookup Section -->
+    <section id="lookupSection" style="display: none;">
+      <div class="lookup-card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px;">Look Up Your Bookings</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+          Enter the email address you used to book your appointments.
+        </p>
+        <div style="display: flex; gap: 10px; max-width: 480px;">
+          <input type="email" id="lookupEmail" placeholder="e.g. ada@example.com" style="flex: 1;" />
+          <button class="btn" onclick="lookupBookings()">Search</button>
+        </div>
+      </div>
+
+      <div id="userBookingsList"></div>
+    </section>
+  </main>
+
+  <!-- Booking Modal -->
+  <div class="modal-overlay" id="bookingModal">
+    <div class="modal">
+      <h2>Complete Booking</h2>
+      <p class="modal-sub" id="modalSlotSummary"></p>
+
+      <form id="bookingForm" onsubmit="submitBooking(event)">
+        <input type="hidden" id="modalSlotId" />
+        <div class="form-group">
+          <label for="patientName">Full Name</label>
+          <input type="text" id="patientName" required placeholder="Ada Obi" />
+        </div>
+        <div class="form-group">
+          <label for="patientEmail">Email Address</label>
+          <input type="email" id="patientEmail" required placeholder="ada@example.com" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn" id="modalSubmitBtn">Confirm Appointment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentApiKey = 'koya-clinic-secret-key-2026';
+    let allSlots = [];
+
+    // Initialize API Key from backend config
+    async function init() {
+      try {
+        const res = await fetch('/config');
+        if (res.ok) {
+          const cfg = await res.json();
+          if (cfg.defaultApiKey) {
+            currentApiKey = cfg.defaultApiKey;
+          }
+        }
+      } catch (e) {
+        console.warn('Using fallback API key', e);
+      }
+      loadSlots();
+    }
+
+    function switchTab(tab) {
+      document.getElementById('tabSlotsBtn').classList.toggle('active', tab === 'slots');
+      document.getElementById('tabLookupBtn').classList.toggle('active', tab === 'lookup');
+      document.getElementById('slotsSection').style.display = tab === 'slots' ? 'block' : 'none';
+      document.getElementById('lookupSection').style.display = tab === 'lookup' ? 'block' : 'none';
+    }
+
+    function showAlert(msg) {
+      const box = document.getElementById('alertBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+      setTimeout(() => { box.style.display = 'none'; }, 5000);
+    }
+
+    // Load Slots from API
+    async function loadSlots() {
+      const provider = document.getElementById('providerFilter').value;
+      const url = provider ? `/slots?provider=${encodeURIComponent(provider)}` : '/slots';
+
+      try {
+        const res = await fetch(url, {
+          headers: { 'X-API-Key': currentApiKey }
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed to load slots (${res.status})`);
+        }
+
+        const data = await res.json();
+        allSlots = data.slots || [];
+        renderSlots(allSlots);
+        populateProviders(allSlots);
+      } catch (err) {
+        document.getElementById('slotsContainer').innerHTML = `
+          <div class="empty-state" style="color: var(--danger);">
+            ${err.message}. Check if demo slots need to be seeded.
+          </div>
+        `;
+      }
+    }
+
+    function populateProviders(slots) {
+      const select = document.getElementById('providerFilter');
+      const current = select.value;
+      const providers = Array.from(new Set(slots.map(s => s.provider))).sort();
+
+      select.innerHTML = '<option value="">All Providers</option>' +
+        providers.map(p => `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`).join('');
+    }
+
+    function formatDate(isoStr) {
+      const date = new Date(isoStr);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function renderSlots(slots) {
+      const container = document.getElementById('slotsContainer');
+      if (!slots || slots.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            No appointment slots currently available. Please refresh or check back soon.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = slots.map(slot => {
+        const isPast = new Date(slot.start).getTime() <= Date.now();
+        const canBook = slot.available && !isPast;
+        const statusLabel = !slot.available ? 'Booked' : (isPast ? 'Expired' : 'Available');
+        const statusClass = slot.available && !isPast ? 'status-available' : 'status-booked';
+
+        return `
+          <div class="slot-card">
+            <div>
+              <div class="slot-header">
+                <div class="provider-name">${escapeHtml(slot.provider)}</div>
+                <span class="slot-status ${statusClass}">${statusLabel}</span>
+              </div>
+              <div class="slot-time">
+                <span>Start: <strong>${formatDate(slot.start)}</strong></span>
+                <span>End: <strong>${formatDate(slot.end)}</strong></span>
+              </div>
+            </div>
+            <button class="btn slot-btn" ${!canBook ? 'disabled' : ''} onclick="openBookingModal('${slot.id}', '${escapeHtml(slot.provider)}', '${slot.start}')">
+              ${canBook ? 'Book Slot' : (slot.available ? 'Slot Passed' : 'Unavailable')}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openBookingModal(slotId, provider, startTime) {
+      document.getElementById('modalSlotId').value = slotId;
+      document.getElementById('modalSlotSummary').textContent = `${provider} • ${formatDate(startTime)}`;
+      document.getElementById('bookingModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('bookingModal').classList.remove('active');
+      document.getElementById('bookingForm').reset();
+    }
+
+    // Submit Booking
+    async function submitBooking(e) {
+      e.preventDefault();
+      const slot_id = document.getElementById('modalSlotId').value;
+      const name = document.getElementById('patientName').value.trim();
+      const email = document.getElementById('patientEmail').value.trim();
+      const btn = document.getElementById('modalSubmitBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Booking...';
+
+      try {
+        const res = await fetch('/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': currentApiKey
+          },
+          body: JSON.stringify({ slot_id, name, email })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to book slot');
+        }
+
+        closeModal();
+
+        // Show confirmation banner
+        const banner = document.getElementById('confirmBanner');
+        document.getElementById('confirmDetails').innerHTML = `
+          Appointment ID: <strong>${data.id}</strong><br>
+          Patient: <strong>${escapeHtml(data.name)}</strong> (${escapeHtml(data.email)})<br>
+          Status: <strong>${data.status.toUpperCase()}</strong>
+        `;
+        banner.classList.add('active');
+        banner.scrollIntoView({ behavior: 'smooth' });
+
+        // Reload slots
+        loadSlots();
+      } catch (err) {
+        showAlert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirm Appointment';
+      }
+    }
+
+    // Lookup bookings by email (Level 4 endpoint)
+    async function lookupBookings() {
+      const email = document.getElementById('lookupEmail').value.trim();
+      if (!email) {
+        showAlert('Please enter an email to search');
+        return;
+      }
+
+      const container = document.getElementById('userBookingsList');
+      container.innerHTML = '<div class="empty-state">Searching bookings...</div>';
+
+      try {
+        const res = await fetch(`/bookings?email=${encodeURIComponent(email)}`, {
+          headers: { 'X-API-Key': currentApiKey }
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to search bookings');
+        }
+
+        const bookings = data.bookings || [];
+        if (bookings.length === 0) {
+          container.innerHTML = `<div class="empty-state">No bookings found for ${escapeHtml(email)}.</div>`;
+          return;
+        }
+
+        container.innerHTML = bookings.map(b => `
+          <div class="booking-item">
+            <div class="booking-info">
+              <h4>Slot ID: ${escapeHtml(b.slot_id)} • Status: <span style="color: ${b.status === 'confirmed' ? 'var(--success)' : 'var(--danger)'};">${b.status.toUpperCase()}</span></h4>
+              <div class="booking-meta">
+                Booking ID: ${b.id}<br>
+                Patient: ${escapeHtml(b.name)} (${escapeHtml(b.email)})<br>
+                Booked at: ${formatDate(b.created_at)}
+              </div>
+            </div>
+            ${b.status === 'confirmed' ? `
+              <button class="btn btn-danger" onclick="cancelBooking('${b.id}')">Cancel</button>
+            ` : '<span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Cancelled</span>'}
+          </div>
+        `).join('');
+      } catch (err) {
+        showAlert(err.message);
+        container.innerHTML = '';
+      }
+    }
+
+    // Cancel booking (Level 3 endpoint)
+    async function cancelBooking(id) {
+      if (!confirm('Are you sure you want to cancel this booking?')) return;
+
+      try {
+        const res = await fetch(`/bookings/${id}`, {
+          method: 'DELETE',
+          headers: { 'X-API-Key': currentApiKey }
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to cancel');
+        }
+
+        showAlert('Booking cancelled successfully');
+        lookupBookings();
+        loadSlots();
+      } catch (err) {
+        showAlert(err.message);
+      }
+    }
+
+
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
