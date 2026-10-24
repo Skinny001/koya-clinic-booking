@@ -105,6 +105,25 @@ async function initDb() {
       );
       CREATE INDEX IF NOT EXISTS idx_attempts_email_time ON attempts(email, created_at);
     `);
+
+    // Auto-seed default upcoming consultation slots if database is empty
+    const slotCount = sqliteDb.prepare('SELECT COUNT(*) as cnt FROM slots').get();
+    if (slotCount && slotCount.cnt === 0) {
+      const now = Date.now();
+      const day = 86400000;
+      const defaultSlots = [
+        { id: 'slot_cardio_1', provider: 'Dr. Sarah Johnson', start: new Date(now + day + 3600000 * 9).toISOString(), end: new Date(now + day + 3600000 * 9.5).toISOString() },
+        { id: 'slot_cardio_2', provider: 'Dr. Sarah Johnson', start: new Date(now + day + 3600000 * 14).toISOString(), end: new Date(now + day + 3600000 * 14.5).toISOString() },
+        { id: 'slot_peds_1', provider: 'Dr. Tunde Bakare', start: new Date(now + day + 3600000 * 10).toISOString(), end: new Date(now + day + 3600000 * 10.5).toISOString() },
+        { id: 'slot_peds_2', provider: 'Dr. Tunde Bakare', start: new Date(now + day + 3600000 * 15.5).toISOString(), end: new Date(now + day + 3600000 * 16).toISOString() },
+        { id: 'slot_gp_1', provider: 'Dr. Fatima Bello', start: new Date(now + day + 3600000 * 11.5).toISOString(), end: new Date(now + day + 3600000 * 12).toISOString() },
+        { id: 'slot_gp_2', provider: 'Dr. Fatima Bello', start: new Date(now + day * 2 + 3600000 * 10).toISOString(), end: new Date(now + day * 2 + 3600000 * 10.5).toISOString() }
+      ];
+      const insert = sqliteDb.prepare('INSERT INTO slots (id, provider, start, end) VALUES (@id, @provider, @start, @end)');
+      for (const s of defaultSlots) {
+        insert.run(s);
+      }
+    }
   }
 }
 
