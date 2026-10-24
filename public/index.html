@@ -538,8 +538,8 @@
     /* Slots Grid */
     .slots-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 22px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
     }
 
     .slot-card {
@@ -1248,7 +1248,23 @@
         providers.map(p => `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`).join('');
     }
 
+    function formatTimeRange(startIso, endIso) {
+      const s = new Date(startIso);
+      const e = new Date(endIso || startIso);
+      const dateStr = s.toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric'
+      });
+      const startTime = s.toLocaleTimeString('en-US', {
+        hour: '2-digit', minute: '2-digit'
+      });
+      const endTime = e.toLocaleTimeString('en-US', {
+        hour: '2-digit', minute: '2-digit'
+      });
+      return { dateStr, timeRange: `${startTime} – ${endTime}` };
+    }
+
     function formatDate(isoStr) {
+      if (!isoStr) return '';
       const date = new Date(isoStr);
       return date.toLocaleDateString('en-US', {
         weekday: 'short', month: 'short', day: 'numeric',
@@ -1272,6 +1288,7 @@
         const canBook = slot.available && !isPast;
         const statusLabel = !slot.available ? 'Booked' : (isPast ? 'Expired' : 'Available');
         const statusClass = slot.available && !isPast ? 'status-available' : 'status-booked';
+        const t = formatTimeRange(slot.start, slot.end);
 
         return `
           <div class="slot-card liquid-glass liquid-glass-card">
@@ -1281,11 +1298,11 @@
                 <span class="slot-status ${statusClass}">${statusLabel}</span>
               </div>
               <div class="slot-time">
-                <span>Start: <strong>${formatDate(slot.start)}</strong></span>
-                <span>End: <strong>${formatDate(slot.end)}</strong></span>
+                <span>📅 <strong>${t.dateStr}</strong></span>
+                <span>⏰ Session: <strong>${t.timeRange}</strong></span>
               </div>
             </div>
-            <button class="btn slot-btn" ${!canBook ? 'disabled' : ''} onclick="openBookingModal('${slot.id}', '${escapeHtml(slot.provider)}', '${slot.start}')">
+            <button class="btn slot-btn" ${!canBook ? 'disabled' : ''} onclick="openBookingModal('${slot.id}', '${escapeHtml(slot.provider)}', '${slot.start}', '${slot.end}')">
               ${canBook ? 'Book Slot' : (slot.available ? 'Slot Passed' : 'Unavailable')}
             </button>
           </div>
@@ -1293,11 +1310,13 @@
       }).join('');
     }
 
-    function openBookingModal(slotId, provider, startTime) {
+    function openBookingModal(slotId, provider, startTime, endTime) {
+      const t = formatTimeRange(startTime, endTime);
       document.getElementById('modalSlotId').value = slotId;
-      document.getElementById('modalSlotSummary').textContent = `${provider} • ${formatDate(startTime)}`;
+      document.getElementById('modalSlotSummary').textContent = `${provider} • ${t.dateStr} (${t.timeRange})`;
       document.getElementById('modalSlotSummary').dataset.provider = provider;
       document.getElementById('modalSlotSummary').dataset.start = startTime;
+      document.getElementById('modalSlotSummary').dataset.end = endTime || startTime;
       document.getElementById('bookingModal').classList.add('active');
     }
 
@@ -1341,8 +1360,10 @@
         closeModal();
 
         // Populate and open Confirmation Modal
+        const endTime = document.getElementById('modalSlotSummary').dataset.end;
+        const t = formatTimeRange(startTime, endTime);
         document.getElementById('successDoctor').textContent = provider;
-        document.getElementById('successTime').textContent = startTime ? formatDate(startTime) : 'Confirmed';
+        document.getElementById('successTime').textContent = `${t.dateStr} • ${t.timeRange}`;
         document.getElementById('successPatient').textContent = `${data.name} (${data.email})`;
         document.getElementById('successBookingId').textContent = data.id;
         document.getElementById('bookingSuccessModal').classList.add('active');
